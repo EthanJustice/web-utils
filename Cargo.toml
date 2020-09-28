@@ -10,3 +10,4 @@ license = "MIT"
 publish = false # for now
 
 [dependencies]
+clap = "~2.33.3"
