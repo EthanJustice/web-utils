@@ -11,3 +11,5 @@ publish = false # for now
 
 [dependencies]
 clap = "~2.33.3"
+
+hyperbuild = "~0.2.4"

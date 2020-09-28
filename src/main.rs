@@ -1,7 +1,10 @@
 // std
+use std::fs::{read, write};
+use std::path::Path;
 
 // extern
 use clap::{App, Arg, SubCommand};
+use hyperbuild::{hyperbuild_copy, Cfg};
 
 fn main() {
     let app = App::new("web-utils")
@@ -40,7 +43,24 @@ fn main() {
         )
         .get_matches();
 
-    if let Some(_v) = app.subcommand_matches("optimise") {
-        println!("Called optimise");
+    if let Some(v) = app.subcommand_matches("optimise") {
+        let file_or_dir = Path::new(v.value_of("INPUT").unwrap());
+        if file_or_dir.exists() == true {
+            if file_or_dir.is_dir() == true {
+            } else if file_or_dir.is_file() == true {
+                if file_or_dir.extension().unwrap() == "html" {
+                    write(
+                        file_or_dir,
+                        &hyperbuild_copy(
+                            &mut read(file_or_dir).expect("Failed to read file."),
+                            &Cfg { minify_js: false },
+                        )
+                        .unwrap(),
+                    )
+                    .expect("Failed to write to file.");
+                }
+            }
+            println!("Called optimise");
+        }
     }
 }
