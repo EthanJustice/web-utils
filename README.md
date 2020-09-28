@@ -1,2 +1,10 @@
 # web-utils
- utilities for web-based programming projects (html/css/js)
+
+utilities for web-based programming projects (html/css/js)
+
+## Roadmap
+
++ Optimisations
+  + inlining
+  + minimizing
++ Config (`.wu`?)
