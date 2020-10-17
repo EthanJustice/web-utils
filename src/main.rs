@@ -13,7 +13,8 @@ use serde_json::to_writer_pretty;
 // local
 use web_utils::Index;
 
-static VALID_INDEX_EXTENSIONS: [&str; 4] = ["html", "htm", "js", "css"];
+static VALID_INDEX_EXTENSIONS: [&str; 2] = ["html", "htm"];
+static VALID_INDEX_ASSET_EXTENSIONS: [&str; 2] = ["js", "css"];
 
 fn main() {
     let app = App::new("web-utils")
@@ -97,7 +98,11 @@ fn main() {
                     let file = entry.expect("Couldn't read file, aborting...");
                     match file.path().extension() {
                         Some(ext) => {
-                            if VALID_INDEX_EXTENSIONS.contains(&ext.to_string_lossy().as_ref()) {
+                            let s = ext.to_string_lossy();
+                            if VALID_INDEX_EXTENSIONS.contains(&s.as_ref())
+                                || (v.is_present("include-assets") == true
+                                    && VALID_INDEX_ASSET_EXTENSIONS.contains(&s.as_ref()))
+                            {
                                 file_index.push(format!(
                                     "{}",
                                     file.into_path().display().to_string().replace("\\", "/")
