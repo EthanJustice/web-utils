@@ -1,0 +1,20 @@
+[package]
+name = "web-utils"
+version = "0.1.0"
+authors = ["EthanJustice <47954690+EthanJustice@users.noreply.github.com>"]
+edition = "2018"
+readme = "README.md"
+homepage = "https://github.com/EthanJustice/web-utils"
+repository = "https://github.com/EthanJustice/web-utils"
+license = "MIT"
+publish = false # for now
+
+[dependencies]
+clap = "~2.33.3"
+
+serde = { version = "~1.0.117", features = ["derive"] }
+serde_json = "~1.0.59"
+
+walkdir = "~2.3.1"
+
+hyperbuild = "~0.2.4"
