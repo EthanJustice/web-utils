@@ -1,5 +1,6 @@
 [package]
 name = "web-utils"
+description = "utilities for web programming"
 version = "0.1.0"
 authors = ["EthanJustice <47954690+EthanJustice@users.noreply.github.com>"]
 edition = "2018"
@@ -18,3 +19,5 @@ serde_json = "~1.0.59"
 walkdir = "~2.3.1"
 
 hyperbuild = "~0.2.4"
+
+min = { git = "https://github.com/EthanJustice/min/", branch = "main" }

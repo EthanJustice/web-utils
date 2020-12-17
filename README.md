@@ -1,10 +1,13 @@
 # web-utils
 
-utilities for web-based programming projects (html/css/js)
+utilities for web programming projects (html/css/js)
 
 ## Roadmap
 
 + Optimisations
-  + inlining
-  + minimizing
+  + inlining (css -> html)
+  + minimizing (js, ~~css~~, html)
+  + critical css
+    + inlining critical css
 + Config (`.wu`?)
++ respect `.gitignore`s

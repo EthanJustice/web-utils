@@ -1,31 +1,27 @@
 // std
-use std::fs::{read, write};
 use std::path::Path;
 
 // extern
 use clap::{App, Arg, SubCommand};
-use hyperbuild::{hyperbuild_copy, Cfg};
-
-use walkdir::WalkDir;
-
-use serde_json::to_writer_pretty;
 
 // local
-use web_utils::Index;
-
-static VALID_INDEX_EXTENSIONS: [&str; 2] = ["html", "htm"];
-static VALID_INDEX_ASSET_EXTENSIONS: [&str; 2] = ["js", "css"];
+use web_utils::{index, optimise};
 
 fn main() {
-    let app = App::new("web-utils")
-        .version("0.0.1")
-        .author("Ethan Justice")
-        .about("Utilities for web programming (JS, CSS, HTML).")
+    let app = App::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
         .subcommand(
             SubCommand::with_name("index")
                 .about("Index a directory, and generate a JSON file")
                 .version("0.0.1")
                 .author("Ethan Justice")
+                .arg(
+                    Arg::with_name("INPUT")
+                        .help("The file or directory to use.")
+                        .required(true),
+                )
                 .arg(
                     Arg::with_name("include-assets")
                         .short("a")
@@ -33,10 +29,17 @@ fn main() {
                         .takes_value(false),
                 )
                 .arg(
-                    Arg::with_name("INPUT")
-                        .help("The directory to index.")
-                        .index(1)
-                        .required(true),
+                    Arg::with_name("output")
+                        .short("o")
+                        .help("Specifiy a path for the output file")
+                        .takes_value(true)
+                        .required(false),
+                )
+                .arg(
+                    Arg::with_name("accept")
+                        .help("Specify file types to include.")
+                        .takes_value(true)
+                        .required(false),
                 ),
         )
         .subcommand(
@@ -45,79 +48,40 @@ fn main() {
                 .version("0.0.1")
                 .author("Ethan Justice")
                 .arg(
+                    Arg::with_name("INPUT")
+                        .help("The file or directory to use.")
+                        .required(true),
+                )
+                .arg(
                     Arg::with_name("minify")
                         .short("m")
+                        .long("minify")
                         .help("Only minify the specified items.")
                         .takes_value(false),
                 )
                 .arg(
                     Arg::with_name("inline")
                         .short("i")
+                        .long("inline")
                         .help("Only inline the specified items.")
                         .takes_value(false),
                 )
                 .arg(
                     Arg::with_name("recursive")
                         .short("r")
+                        .long("recursive")
                         .help("Recursively optimise a directory")
                         .takes_value(false),
-                )
-                .arg(
-                    Arg::with_name("INPUT")
-                        .help("The file or directory to use.")
-                        .index(1)
-                        .required(true),
                 ),
         )
         .get_matches();
 
     if let Some(v) = app.subcommand_matches("optimise") {
-        let file_or_dir = Path::new(v.value_of("INPUT").unwrap());
-        if file_or_dir.exists() == true {
-            if file_or_dir.is_dir() == true {
-            } else if file_or_dir.is_file() == true {
-                if file_or_dir.extension().unwrap() == "html" {
-                    write(
-                        file_or_dir,
-                        &hyperbuild_copy(
-                            &mut read(file_or_dir).expect("Failed to read file."),
-                            &Cfg { minify_js: false },
-                        )
-                        .unwrap(),
-                    )
-                    .expect("Failed to write to file.");
-                }
-            }
-        }
+        optimise(&Path::new(v.value_of("INPUT").unwrap()));
     } else if let Some(v) = app.subcommand_matches("index") {
-        let dir = Path::new(v.value_of("INPUT").unwrap());
-        if dir.exists() == true {
-            if dir.is_dir() == true {
-                let mut file_index = Vec::new();
-                for entry in WalkDir::new(dir) {
-                    let file = entry.expect("Couldn't read file, aborting...");
-                    match file.path().extension() {
-                        Some(ext) => {
-                            let s = ext.to_string_lossy();
-                            if VALID_INDEX_EXTENSIONS.contains(&s.as_ref())
-                                || (v.is_present("include-assets") == true
-                                    && VALID_INDEX_ASSET_EXTENSIONS.contains(&s.as_ref()))
-                            {
-                                file_index.push(format!(
-                                    "{}",
-                                    file.into_path().display().to_string().replace("\\", "/")
-                                ));
-                            }
-                        }
-                        None => {}
-                    }
-                }
-                to_writer_pretty(
-                    std::fs::File::create(dir.join("index.json")).expect("Failed to write to file"),
-                    &Index { files: file_index },
-                )
-                .expect("Failed to write to file.");
-            }
-        }
+        index(
+            &Path::new(v.value_of("INPUT").unwrap()),
+            v.is_present("include-assets"),
+        );
     }
 }
