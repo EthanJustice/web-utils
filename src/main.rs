@@ -24,12 +24,14 @@ fn main() {
                 )
                 .arg(
                     Arg::with_name("include-assets")
+                        .long("include-assets")
                         .short("a")
                         .help("Include CSS and JS files")
                         .takes_value(false),
                 )
                 .arg(
                     Arg::with_name("output")
+                        .long("output")
                         .short("o")
                         .help("Specifiy a path for the output file")
                         .takes_value(true)
@@ -37,6 +39,7 @@ fn main() {
                 )
                 .arg(
                     Arg::with_name("accept")
+                        .long("accept")
                         .help("Specify file types to include.")
                         .takes_value(true)
                         .required(false),
@@ -82,6 +85,7 @@ fn main() {
         index(
             &Path::new(v.value_of("INPUT").unwrap()),
             v.is_present("include-assets"),
+            v.value_of("output"),
         );
     }
 }

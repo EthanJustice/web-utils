@@ -1,5 +1,5 @@
 // std
-use std::fs::{read, read_to_string, write};
+use std::fs::{create_dir_all, read, read_to_string, write, File};
 use std::path::Path;
 
 // crates
@@ -51,7 +51,7 @@ pub fn optimise(file_or_dir: &Path) {
 }
 
 /// Indexes a directory and generates an index
-pub fn index(dir: &Path, include_assets: bool) {
+pub fn index(dir: &Path, include_assets: bool, output: Option<&str>) {
     if dir.exists() == true {
         if dir.is_dir() == true {
             let mut file_index = Vec::new();
@@ -66,15 +66,31 @@ pub fn index(dir: &Path, include_assets: bool) {
                         {
                             file_index.push(format!(
                                 "{}",
-                                file.into_path().display().to_string().replace("\\", "/")
+                                file.into_path()
+                                    .display()
+                                    .to_string()
+                                    .replace("\\", "/")
+                                    .replace("./", "")
                             ));
                         }
                     }
                     None => {}
                 }
             }
+            let output_path = match output {
+                Some(out) => {
+                    let path = Path::new(out);
+                    if path.is_dir() == false {
+                        create_dir_all(path).expect("Failed to create directory.");
+                    }
+
+                    path
+                }
+                None => dir,
+            };
+
             to_writer_pretty(
-                std::fs::File::create(dir.join("index.json")).expect("Failed to write to file"),
+                File::create(output_path.join("index.json")).expect("Failed to write to file"),
                 &AssetIndex { files: file_index },
             )
             .expect("Failed to write to file.");
